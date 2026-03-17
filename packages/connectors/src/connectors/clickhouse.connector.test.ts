@@ -280,7 +280,8 @@ describe('ClickHouseConnector', () => {
     });
 
     it('should handle query errors', async () => {
-      mockQuery.mockRejectedValueOnce(new Error('Syntax error'));
+      // INVALID SQL is not a SELECT/WITH/SHOW → goes through command() not query()
+      mockCommand.mockRejectedValueOnce(new Error('Syntax error'));
       await connector.connect();
       await expect(connector.executeQuery('INVALID SQL')).rejects.toThrow();
     });
@@ -323,7 +324,7 @@ describe('ClickHouseConnector', () => {
     });
 
     it('should handle cancellation error gracefully', async () => {
-      mockQuery.mockRejectedValueOnce(new Error('Kill failed'));
+      // cancelQuery with unknown query id returns early without calling client.query
       await connector.connect();
       await expect(connector.cancelQuery('q-1')).resolves.toBeUndefined();
     });

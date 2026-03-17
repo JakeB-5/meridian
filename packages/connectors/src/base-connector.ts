@@ -318,7 +318,9 @@ export abstract class BaseConnector implements Connector {
       const finalResult: QueryResult = {
         ...result,
         rows,
-        rowCount: rows.length,
+        // For mutation queries (INSERT/UPDATE/DELETE), rows is empty and rowCount
+        // reflects affectedRows from the connector. For SELECT, use rows.length.
+        rowCount: rows.length > 0 ? rows.length : result.rowCount,
         executionTimeMs,
         truncated: truncated || result.truncated,
       };

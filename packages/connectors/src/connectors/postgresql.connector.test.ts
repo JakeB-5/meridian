@@ -372,8 +372,7 @@ describe('PostgreSQLConnector', () => {
       mockClientQuery
         .mockResolvedValueOnce({ rows: [{ pid: 99999 }] }) // pg_backend_pid
         .mockResolvedValueOnce({ rows: [] }) // SET statement_timeout
-        .mockImplementationOnce(() => queryPromise.then(() => ({ rows: [], fields: [] }))) // actual query
-        .mockResolvedValueOnce({ rows: [{ pg_cancel_backend: true }] }); // pg_cancel_backend
+        .mockImplementationOnce(() => queryPromise.then(() => ({ rows: [], fields: [] }))); // actual query
 
       await connector.connect();
 
