@@ -1,0 +1,28 @@
+{
+  "name": "@meridian/config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./typescript/base": "./src/typescript/base.json",
+    "./typescript/react": "./src/typescript/react.json",
+    "./eslint/base": "./src/eslint/base.config.mjs",
+    "./eslint/react": "./src/eslint/react.config.mjs",
+    "./vitest": "./src/vitest/base.config.ts",
+    "./prettier": "./src/prettier/base.json"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

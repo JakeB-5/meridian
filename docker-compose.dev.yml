@@ -1,0 +1,94 @@
+# Development override — use with: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This file overrides production settings for local development:
+#   - Source code is volume-mounted for hot reload
+#   - Services run in dev mode (tsx watch / vite dev)
+#   - Ports are exposed for direct access from host
+#   - Node modules from the container are not overwritten by host mounts
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: meridian
+      POSTGRES_PASSWORD: meridian
+      POSTGRES_DB: meridian
+
+  redis:
+    ports:
+      - "6379:6379"
+    # No password in dev for convenience
+    command: redis-server --appendonly yes
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Use the deps stage so devDependencies (tsx) are available
+      target: deps
+    command: pnpm --filter @meridian/server dev
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://meridian:meridian@postgres:5432/meridian
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-production
+      PORT: 3001
+      LOG_LEVEL: debug
+      CORS_ORIGIN: http://localhost:5173
+    volumes:
+      # Mount source — exclude node_modules so container's copy is used
+      - .:/app
+      - /app/node_modules
+      - /app/apps/server/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Disable healthcheck in dev (app may restart frequently)
+    healthcheck:
+      disable: true
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      target: deps
+    command: pnpm --filter @meridian/worker dev
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://meridian:meridian@postgres:5432/meridian
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: debug
+      WORKER_CONCURRENCY: 2
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/worker/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      target: deps
+    command: pnpm --filter @meridian/web dev --host
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:3001
+      VITE_WS_URL: ws://localhost:3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    depends_on:
+      - server

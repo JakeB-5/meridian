@@ -1,0 +1,33 @@
+node_modules
+dist
+.git
+.omc
+.turbo
+coverage
+*.log
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode
+.idea
+*.swp
+*.swo
+
+# Test output
+test-results
+playwright-report
+
+# Build cache
+.next
+.cache
+
+# Secrets (never include)
+.env
+*.pem
+*.key
+*.cert

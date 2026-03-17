@@ -1,0 +1,105 @@
+# =============================================================================
+# Stage 1: Install dependencies
+# =============================================================================
+FROM node:20-alpine AS deps
+
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+WORKDIR /app
+
+# Copy workspace manifests first for layer caching
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY turbo.json ./
+
+# Copy all package.json files maintaining directory structure
+COPY apps/server/package.json ./apps/server/
+COPY apps/worker/package.json ./apps/worker/
+COPY apps/web/package.json ./apps/web/
+COPY apps/cli/package.json ./apps/cli/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/cache/package.json ./packages/cache/
+COPY packages/config/package.json ./packages/config/
+COPY packages/connectors/package.json ./packages/connectors/
+COPY packages/core/package.json ./packages/core/
+COPY packages/db/package.json ./packages/db/
+COPY packages/plugins/package.json ./packages/plugins/
+COPY packages/query-engine/package.json ./packages/query-engine/
+COPY packages/realtime/package.json ./packages/realtime/
+COPY packages/scheduler/package.json ./packages/scheduler/
+COPY packages/sdk/package.json ./packages/sdk/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/viz/package.json ./packages/viz/
+
+RUN pnpm install --frozen-lockfile
+
+# =============================================================================
+# Stage 2: Build all packages and apps
+# =============================================================================
+FROM deps AS build
+
+COPY . .
+
+# Build all packages and apps via turbo
+RUN pnpm build --filter=@meridian/server...
+
+# =============================================================================
+# Stage 3: Production image for server
+# =============================================================================
+FROM node:20-alpine AS production
+
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy workspace manifests
+COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
+COPY --from=build /app/turbo.json ./
+
+# Copy package.json files for all packages (needed for workspace resolution)
+COPY --from=build /app/apps/server/package.json ./apps/server/
+COPY --from=build /app/packages/auth/package.json ./packages/auth/
+COPY --from=build /app/packages/cache/package.json ./packages/cache/
+COPY --from=build /app/packages/config/package.json ./packages/config/
+COPY --from=build /app/packages/connectors/package.json ./packages/connectors/
+COPY --from=build /app/packages/core/package.json ./packages/core/
+COPY --from=build /app/packages/db/package.json ./packages/db/
+COPY --from=build /app/packages/plugins/package.json ./packages/plugins/
+COPY --from=build /app/packages/query-engine/package.json ./packages/query-engine/
+COPY --from=build /app/packages/realtime/package.json ./packages/realtime/
+COPY --from=build /app/packages/scheduler/package.json ./packages/scheduler/
+COPY --from=build /app/packages/shared/package.json ./packages/shared/
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built artifacts from all packages
+COPY --from=build /app/packages/auth/dist ./packages/auth/dist
+COPY --from=build /app/packages/cache/dist ./packages/cache/dist
+COPY --from=build /app/packages/config/src ./packages/config/src
+COPY --from=build /app/packages/connectors/dist ./packages/connectors/dist
+COPY --from=build /app/packages/core/dist ./packages/core/dist
+COPY --from=build /app/packages/db/dist ./packages/db/dist
+COPY --from=build /app/packages/plugins/dist ./packages/plugins/dist
+COPY --from=build /app/packages/query-engine/dist ./packages/query-engine/dist
+COPY --from=build /app/packages/realtime/dist ./packages/realtime/dist
+COPY --from=build /app/packages/scheduler/dist ./packages/scheduler/dist
+COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+
+# Copy server built output
+COPY --from=build /app/apps/server/dist ./apps/server/dist
+
+# Run as non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 meridian && \
+    chown -R meridian:nodejs /app
+USER meridian
+
+EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget -qO- http://localhost:3001/health || exit 1
+
+CMD ["node", "apps/server/dist/index.js"]

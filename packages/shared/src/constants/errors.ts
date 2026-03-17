@@ -1,0 +1,16 @@
+/** Error code constants used across the application */
+export const ERR_NOT_FOUND = 'ERR_NOT_FOUND';
+export const ERR_VALIDATION = 'ERR_VALIDATION';
+export const ERR_AUTHENTICATION = 'ERR_AUTHENTICATION';
+export const ERR_AUTHORIZATION = 'ERR_AUTHORIZATION';
+export const ERR_CONFLICT = 'ERR_CONFLICT';
+export const ERR_RATE_LIMIT = 'ERR_RATE_LIMIT';
+export const ERR_CONNECTION = 'ERR_CONNECTION';
+export const ERR_QUERY_EXECUTION = 'ERR_QUERY_EXECUTION';
+export const ERR_UNEXPECTED = 'ERR_UNEXPECTED';
+export const ERR_TIMEOUT = 'ERR_TIMEOUT';
+export const ERR_INVALID_STATE = 'ERR_INVALID_STATE';
+export const ERR_DUPLICATE = 'ERR_DUPLICATE';
+export const ERR_PLUGIN_LOAD = 'ERR_PLUGIN_LOAD';
+export const ERR_DATASOURCE_CONNECTION = 'ERR_DATASOURCE_CONNECTION';
+export const ERR_SCHEMA_FETCH = 'ERR_SCHEMA_FETCH';

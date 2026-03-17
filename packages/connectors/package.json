@@ -1,0 +1,32 @@
+{
+  "name": "@meridian/connectors",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "test": "vitest run --no-cache",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@meridian/core": "workspace:*",
+    "@meridian/shared": "workspace:*",
+    "pg": "^8.13.0",
+    "mysql2": "^3.11.0",
+    "better-sqlite3": "^11.6.0",
+    "@clickhouse/client": "^1.8.0",
+    "duckdb": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/pg": "^8.11.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

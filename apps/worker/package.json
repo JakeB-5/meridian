@@ -1,0 +1,35 @@
+{
+  "name": "@meridian/worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts",
+    "start": "node dist/index.js",
+    "test": "vitest run --no-cache",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@meridian/core": "workspace:*",
+    "@meridian/db": "workspace:*",
+    "@meridian/connectors": "workspace:*",
+    "@meridian/query-engine": "workspace:*",
+    "@meridian/cache": "workspace:*",
+    "@meridian/scheduler": "workspace:*",
+    "@meridian/realtime": "workspace:*",
+    "@meridian/shared": "workspace:*",
+    "bullmq": "^5.25.0",
+    "drizzle-orm": "^0.36.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

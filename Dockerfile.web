@@ -1,0 +1,79 @@
+# =============================================================================
+# Stage 1: Install dependencies
+# =============================================================================
+FROM node:20-alpine AS deps
+
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+
+WORKDIR /app
+
+# Copy workspace manifests first for layer caching
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY turbo.json ./
+
+# Copy all package.json files maintaining directory structure
+COPY apps/server/package.json ./apps/server/
+COPY apps/worker/package.json ./apps/worker/
+COPY apps/web/package.json ./apps/web/
+COPY apps/cli/package.json ./apps/cli/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/cache/package.json ./packages/cache/
+COPY packages/config/package.json ./packages/config/
+COPY packages/connectors/package.json ./packages/connectors/
+COPY packages/core/package.json ./packages/core/
+COPY packages/db/package.json ./packages/db/
+COPY packages/plugins/package.json ./packages/plugins/
+COPY packages/query-engine/package.json ./packages/query-engine/
+COPY packages/realtime/package.json ./packages/realtime/
+COPY packages/scheduler/package.json ./packages/scheduler/
+COPY packages/sdk/package.json ./packages/sdk/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/viz/package.json ./packages/viz/
+
+RUN pnpm install --frozen-lockfile
+
+# =============================================================================
+# Stage 2: Build the web app and its dependencies
+# =============================================================================
+FROM deps AS build
+
+ARG VITE_API_URL=http://localhost:3001
+ARG VITE_WS_URL=ws://localhost:3001
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+
+COPY . .
+
+# Build web and all its package dependencies
+RUN pnpm build --filter=@meridian/web...
+
+# =============================================================================
+# Stage 3: Serve via nginx
+# =============================================================================
+FROM nginx:1.27-alpine AS production
+
+# Copy custom nginx configuration
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/default.conf /etc/nginx/conf.d/default.conf
+
+# Copy built static assets
+COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+
+# Add non-root user and fix permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:80/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

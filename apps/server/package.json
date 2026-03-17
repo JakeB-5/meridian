@@ -1,0 +1,43 @@
+{
+  "name": "@meridian/server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsup src/index.ts --format esm --dts",
+    "start": "node dist/index.js",
+    "test": "vitest run --no-cache",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@meridian/core": "workspace:*",
+    "@meridian/db": "workspace:*",
+    "@meridian/connectors": "workspace:*",
+    "@meridian/query-engine": "workspace:*",
+    "@meridian/auth": "workspace:*",
+    "@meridian/cache": "workspace:*",
+    "@meridian/realtime": "workspace:*",
+    "@meridian/plugins": "workspace:*",
+    "@meridian/scheduler": "workspace:*",
+    "@meridian/shared": "workspace:*",
+    "fastify": "^5.1.0",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/jwt": "^9.0.0",
+    "@fastify/websocket": "^11.0.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "fastify-plugin": "^5.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
