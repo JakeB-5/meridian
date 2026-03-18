@@ -39,7 +39,7 @@ The BI landscape is dominated by tools built in other languages:
 - **Type Safety**: Full end-to-end type safety from query to results
 
 ### Visualization & Dashboards
-- **13+ Chart Types**: Line, Bar, Scatter, Pie, Gauge, Heatmap, Funnel, Sankey, and more
+- **13+ Chart Types**: Line, Bar, Area, Scatter, Pie, Gauge, Heatmap, Funnel, Treemap, Map, Combo, and more
 - **Apache ECharts Integration**: Beautiful, performant charts
 - **Real-time Dashboards**: WebSocket-powered live updates
 - **Drag-and-drop Dashboard Builder**: Arrange and resize visualizations instantly
@@ -367,7 +367,7 @@ We welcome contributions from the community! Here's how to get started:
 3. **Make your changes** and write tests
 4. **Run tests locally**: `pnpm test --no-cache`
 5. **Commit using Conventional Commits**: `git commit -m "feat: add new feature"`
-6. **Push and open a PR** against the `main` branch
+6. **Push and open a PR** against the `dev` branch
 
 ### Development Guidelines
 

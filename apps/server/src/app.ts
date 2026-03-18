@@ -16,6 +16,9 @@ import { dashboardRoutes } from './routes/dashboards.routes.js';
 import { userRoutes } from './routes/users.routes.js';
 import { pluginRoutes } from './routes/plugins.routes.js';
 import { embedRoutes } from './routes/embed.routes.js';
+import { adminRoutes } from './routes/admin.routes.js';
+import { exportRoutes } from './routes/export.routes.js';
+import { semanticRoutes } from './routes/semantic.routes.js';
 
 // ── App Factory Options ─────────────────────────────────────────────
 
@@ -159,6 +162,9 @@ export async function createApp(options: CreateAppOptions = {}): Promise<{
   await userRoutes(app, container);
   await pluginRoutes(app, container);
   await embedRoutes(app, container);
+  await adminRoutes(app, container);
+  await exportRoutes(app, container);
+  await semanticRoutes(app, container);
 
   // ── Not Found Handler ─────────────────────────────────────────────
 
